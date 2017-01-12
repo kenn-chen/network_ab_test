@@ -66,10 +66,11 @@ def _label_propogation(graph, labels):
 	N = graph.number_of_nodes()
 	gains = []
 	zscore = lambda arr: np.std(arr) / np.mean(arr)
-	nround = 0
+	nround = 1
 	while len(gains) < 5 or zscore(gains[-5:]) > 0.1:
 		print("Shuffling...")
 		_label_shuffle(labels)
+		print("%d round: label propagation..." % nround)
 		gain = _label_propogation_one_round(graph, labels, N)
 		gains.append(gain)
 		nround += 1
