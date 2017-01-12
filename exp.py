@@ -9,15 +9,15 @@ import util
 from estimator import estimate
 
 
-def write_result(model, method, true_ate, estimated_ate):
+def write_result(model, method, graph, true_ate, estimated_ate):
 	outputfile = config.dynamic['outputfile']
 	if not os.path.exists(outputfile):
 		with open(outputfile, 'w') as fout:
-			fout.write("model,true_ate,estimated_ate\n")
-			fout.write("%s,%s,%f,%f\n" % (model, method, true_ate, estimated_ate))
+			fout.write("model,method,true_ate,estimated_ate\n")
+			fout.write("%s,%s,%s,%f,%f\n" % (model, method, graph, true_ate, estimated_ate))
 	else:
 		with open(outputfile, 'a') as fout:
-			fout.write("%s,%s,%f,%f\n" % (model, method, true_ate, estimated_ate))
+			fout.write("%s,%s,%s,%f,%f\n" % (model, method, graph, true_ate, estimated_ate))
 
 
 
@@ -46,5 +46,5 @@ if __name__ == "__main__":
 	print("Starting estimating...")
 	true_ate, estimated_ate = estimate(graph, adjmat, args.model, args.method)
 	print("Writing result...")
-	write_result(args.model, args.method, true_ate, estimated_ate)
+	write_result(args.model, args.method, args.graph, true_ate, estimated_ate)
 	print("Done.")

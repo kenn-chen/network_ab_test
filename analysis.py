@@ -9,13 +9,18 @@ def stats(filename):
 	with open(filename) as fin:
 		fin.readline()
 		for line in fin:
-			model, true_ate, estimated_ate = line.split(",")
-			results[model].append((true_ate, estimated_ate))
-	for model, value in results.items():
+			model, method, graph, true_ate, estimated_ate = line.split(",")
+			name = "%s|%s|%s" % (model, method, graph)
+			results[name].append((true_ate, estimated_ate))
+	for name, value in results.items():
 		rmse = np.sqrt(np.mean([(float(x1)-float(x2))**2 for x1,x2 in value]))
+		bias = np.mean([abs(float(x1)-float(x2)) for x1,x2 in value])
 		var = np.var([float(x1) for x1,x2 in value])
-		print("%s: rmse->%.6f\tvar->%.6f" % (model, rmse, var))
+		print("rmse->%.6f\tbias->%.6f\tvar->%.6f: %s" % (rmse, bias, var, name))
 
 if __name__ == "__main__":
-	filename = sys.argv[1]
+	if len(sys.argv) < 1:
+		filename = "results/ate.csv"
+	else:
+		filename = sys.argv[1]
 	stats(filename)
