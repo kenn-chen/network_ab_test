@@ -36,7 +36,13 @@ def _label_propogation_one_round(graph, labels, linked_cmt):
 		max_gain = 0
 		swap_node = None
 		cmt_i = labels[i]
+		inner_links_i = linked_cmt[i][cmt_i]
+		potential_cmts = {cmt:True for cmt in linked_cmt[i].keys() if linked_cmt[i][cmt] > inner_links_i}
+		if len(potential_cmts) == 0:
+			continue
 		for j in range(N):
+			if labels[j] not in potential_cmts:
+				continue
 			cmt_j = labels[j]
 			cross_links = linked_cmt[i][cmt_j] + linked_cmt[j][cmt_i]
 			inner_links = linked_cmt[i][cmt_i] + linked_cmt[j][cmt_j]
