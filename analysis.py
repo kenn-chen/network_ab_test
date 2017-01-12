@@ -10,7 +10,7 @@ def stats(filename):
 		fin.readline()
 		for line in fin:
 			model, method, graph, true_ate, estimated_ate = line.split(",")
-			name = "%s|%s|%s" % (model, method, graph)
+			name = "%s|%s|%s" % (graph, model, method)
 			results[name].append((true_ate, estimated_ate))
 	for name, value in results.items():
 		rmse = np.sqrt(np.mean([(float(x1)-float(x2))**2 for x1,x2 in value]))
@@ -19,8 +19,8 @@ def stats(filename):
 		print("rmse->%.6f\tbias->%.6f\tvar->%.6f: %s" % (rmse, bias, var, name))
 
 if __name__ == "__main__":
-	if len(sys.argv) < 1:
-		filename = "results/ate.csv"
-	else:
+	if len(sys.argv) > 1:
 		filename = sys.argv[1]
+	else:
+		filename = "results/ate.csv"
 	stats(filename)

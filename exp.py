@@ -13,7 +13,7 @@ def write_result(model, method, graph, true_ate, estimated_ate):
 	outputfile = config.dynamic['outputfile']
 	if not os.path.exists(outputfile):
 		with open(outputfile, 'w') as fout:
-			fout.write("model,method,true_ate,estimated_ate\n")
+			fout.write("model,method,graph,true_ate,estimated_ate\n")
 			fout.write("%s,%s,%s,%f,%f\n" % (model, method, graph, true_ate, estimated_ate))
 	else:
 		with open(outputfile, 'a') as fout:
@@ -35,10 +35,12 @@ if __name__ == "__main__":
 	config.dynamic["outputfile"] = args.outputfile
 
 	if args.inputfile:
-		config.dynamic["community_file"] = "caches/" + args.inputfile.split(".")[0] + "_community.pickle"
-		config.dynamic["graph_file"] = "caches/" + args.inputfile.split(".")[0] + "_graph.pickle"
+		graph_name = args.inputfile.split("/")[1].split(".")[0]
+		config.dynamic["community_file"] = "caches/" + graph_name + "_community.pickle"
+		config.dynamic["graph_file"] = "caches/" + graph_name + "_graph.pickle"
 		graph, adjmat = util.load_graph(path=args.inputfile)
 	else:
+		graph_name = args.graph_type
 		config.dynamic["community_file"] = "caches/" + args.graph_type + "_community.pickle"
 		config.dynamic["graph_file"] = "caches/" + args.graph_type + "_graph.pickle"
 		graph, adjmat = util.load_graph(graph_type=args.graph_type)
@@ -46,5 +48,5 @@ if __name__ == "__main__":
 	print("Starting estimating...")
 	true_ate, estimated_ate = estimate(graph, adjmat, args.model, args.method)
 	print("Writing result...")
-	write_result(args.model, args.method, args.graph, true_ate, estimated_ate)
+	write_result(args.model, args.method, graph_name, true_ate, estimated_ate)
 	print("Done.")
