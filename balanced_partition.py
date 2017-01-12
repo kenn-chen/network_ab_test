@@ -20,64 +20,78 @@ def _init_partition(graph, k):
 		x += 1
 	return labels
 
-def _label_propogation_one_round(graph, labels, N):
+def _get_linked_cmt(graph, labels):
+	N = graph.number_of_nodes()
+	linked_cmt = defaultdict(lambda: defaultdict(int))
+	for i in range(N):
+		for nbr in graph.neighbors(i):
+			linked_cmt[i][labels[nbr]] += 1
+	return linked_cmt
+
+
+def _label_propogation_one_round(graph, labels, linked_cmt):
+	N = graph.number_of_nodes()
 	total_gain = 0
 	for i in range(N):
 		max_gain = 0
 		swap_node = None
 		cmt_i = labels[i]
-		linked_cmt = defaultdict(int)
-		for nbr in graph.neighbors(i):
-			linked_cmt[labels[nbr]] += 1
-		inner_links_i = linked_cmt[cmt_i]
-
 		for j in range(N):
 			cmt_j = labels[j]
-			if cmt_i == cmt_j or linked_cmt[cmt_j] == 0:
-				continue
-			inner_links_j = sum(1 for nbr in graph.neighbors(j) if labels[nbr] == cmt_j)
-			cross_links_i_j = linked_cmt[cmt_j]
-			cross_links_j_i = sum(1 for nbr in graph.neighbors(j) if labels[nbr] == cmt_i)
-			gain = cross_links_i_j + cross_links_j_i - inner_links_i - inner_links_j
+			cross_links = linked_cmt[i][cmt_j] + linked_cmt[j][cmt_i]
+			inner_links = linked_cmt[i][cmt_i] + linked_cmt[j][cmt_j]
+			gain = cross_links - inner_links
 			if gain > max_gain:
 				max_gain = gain
 				swap_node = j
 
 		if swap_node != None:
-			labels[i] = labels[swap_node]
-			labels[swap_node] = cmt_i
+			for nbr in graph.neighbors(i):
+				linked_cmt[nbr][labels[i]] -= 1
+				linked_cmt[nbr][labels[swap_node]] += 1
+			for nbr in graph.neighbors(swap_node):
+				linked_cmt[nbr][labels[swap_node]] -= 1
+				linked_cmt[nbr][labels[i]] += 1
+			labels[i], labels[swap_node] = labels[swap_node], labels[i]
 			total_gain += max_gain
 	return total_gain
 
 
-def _label_shuffle(labels):
+def _label_shuffle(graph, labels, linked_cmt):
 	N = len(labels)
 	M = int(N * 0.01)
 	nodes = np.arange(N)
 	np.random.shuffle(nodes)
 	node_selected = nodes[:M]
-	labels_selected = [labels[i] for i in node_selected]
-	np.random.shuffle(labels_selected)
+	labels_shuffled = [labels[i] for i in node_selected]
+	np.random.shuffle(labels_shuffled)
 	for i in range(M):
-		labels[node_selected[i]] = labels_selected[i]
+		node = node_selected[i]
+		cmt = labels[node]
+		new_cmt = labels_shuffled[i]
+		for nbr in graph.neighbors(node):
+			linked_cmt[nbr][cmt] -= 1
+			linked_cmt[nbr][new_cmt] += 1
+		labels[node] = new_cmt
 
 
 def _label_propogation(graph, labels):
+	zscore = lambda arr: np.std(arr) / np.mean(arr)
 	N = graph.number_of_nodes()
 	gains = []
-	zscore = lambda arr: np.std(arr) / np.mean(arr)
 	nround = 1
-	while len(gains) < 5 or zscore(gains[-5:]) > 0.1:
+	linked_cmt = _get_linked_cmt(graph, labels)
+	while len(gains) < 3 or zscore(gains[-3:]) > 0.15:
 		print("Shuffling...")
-		_label_shuffle(labels)
-		print("%d round: label propagation..." % nround)
-		gain = _label_propogation_one_round(graph, labels, N)
+		_label_shuffle(graph, labels, linked_cmt)
+		print("round %d: label propagation..." % nround)
+		gain = _label_propogation_one_round(graph, labels, linked_cmt)
 		gains.append(gain)
-		nround += 1
-		if len(gains) < 5:
+		if len(gains) < 3:
 			print("Round %d finished, gain: %d" % (nround, gain))
 		else:
-			print("Round %d finished, gain: %d, zscore: %.4f" % (nround, gain, zscore(gains[-5:])))
+			print("Round %d finished, gain: %d, zscore: %.4f" % (nround, gain, zscore(gains[-3:])))
+		nround += 1
 	return labels
 
 
