@@ -11,7 +11,7 @@ import balanced_partition as bp
 
 def _remove_unidirectional_edges(adjmat):
 	adjmat_r = adjmat + adjmat.T
-	adjmat_r = np.multiply(adjmat_r, adjmat_r==2) / 2
+	adjmat_r = adjmat_r.multiply(adjmat_r==2) / 2
 	adjmat_r = adjmat_r.astype(int)
 	graph_r = nx.from_scipy_sparse_matrix(adjmat_r, create_using=nx.Graph())
 	return graph_r, adjmat_r
