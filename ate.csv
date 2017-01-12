@@ -1,0 +1,15 @@
+model,true_ate,estimated_ate
+linear1,baseline1,0.497601,0.488168
+linear1,baseline1,0.547336,0.483700
+linear1,baseline1,0.530174,0.534734
+linear1,baseline1,0.503119,0.549423
+linear1,baseline1,0.557293,0.503314
+uniform,baseline1,0.522885,0.481945
+uniform,baseline1,0.538309,0.519193
+uniform,baseline1,0.623500,0.489374
+uniform,baseline1,0.623697,0.503736
+linear1,baseline1,0.655859,0.512448
+linear1,baseline1,0.622317,0.563542
+linear1,baseline1,0.632247,0.516772
+linear1,baseline2,0.606993,0.525644
+linear1,baseline2,0.599122,0.485878

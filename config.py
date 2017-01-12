@@ -3,8 +3,8 @@ pool = dict(
 )
 
 graph = dict(
-	node_size = 7000,
-	partition_size = 50,
+	node_size = 2000,
+	partition_size = 100,
 )
 
 dynamic = dict(

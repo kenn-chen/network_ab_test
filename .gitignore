@@ -1,6 +1,9 @@
 __pycache__/
 .png
 *test*
-*result*
 *output*
-*log*
+results/*
+!results/temp.csv
+logs/*
+!logs/gen.log
+!logs/run.log

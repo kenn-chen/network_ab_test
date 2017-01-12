@@ -109,11 +109,3 @@ def clustering(graph, k):
 	labels = {node:label for node,label in enumerate(labels)}
 	print("Partitioning finished.")
 	return iter(groups(labels).values())
-
-
-if __name__ == "__main__":
-	graph = nx.scale_free_graph(4000)
-	graph = graph.to_undirected()
-	labels = clustering(graph, 5)
-
-	#print(labels)
