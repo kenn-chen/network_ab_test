@@ -1,14 +1,14 @@
 #!/usr/bin/env zsh
 
-if [! -d results]; then
+if [ ! -d results]; then
 	mkdir results
 fi
 
-if [! -d logs]; then
+if [ ! -d logs]; then
 	mkdir logs
 fi
 
-if [! -f logs/run.log]; then
+if [ ! -f logs/run.log]; then
 	touch 'logs/run.log'
 fi
 
