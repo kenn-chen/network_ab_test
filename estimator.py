@@ -108,12 +108,13 @@ def estimate_weighted(graph, adjmat):
 	D += (D == 0).astype(int)
 	Z = Z.astype('float64')
 	alpha = 0.5
+	W = Z
 	for i in range(10):
-		W = Z + alpha/(1+alpha)/D*(np.array(np.matrix(Z)*adjmat_t).reshape(-1))
+		W = Z + alpha/(1+alpha)/D*(np.array(np.matrix(W)*adjmat_t).reshape(-1))
 	C = 1+alpha-W
 	W, C, outcome = np.array(W), np.array(C), np.array(outcome)
-	ate = sum(W*outcome)/N - sum(C*outcome)/N
-	print(W)
+	ate = sum(((1+alpha)/W - C/(1+alpha)) * outcome)
+	#print(W)
 	return true_ate, ate
 
 def estimate(graph, adjmat, model="uniform", method="baseline1"):

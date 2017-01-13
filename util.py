@@ -36,10 +36,12 @@ def load_graph(graph_type="barabasi_albert", path=None):
 
 
 def treated_proportion(Z, adjmat):
-	return np.array(np.matrix(Z) * adjmat.T)
+	return np.array(np.matrix(Z) * adjmat)
 
 
 def outcome_generator(graph, Z, adjmat):
+	if config.dynamic["undirected"] == True:
+		return _outcome_generator_undirected(graph, Z, adjmat)
 	N = adjmat.shape[0]
 	lambda0 = np.array([0.1] * N)
 	lambda1 = 0.5
@@ -50,6 +52,22 @@ def outcome_generator(graph, Z, adjmat):
 	Y = np.matrix([0] * N)
 	def outcome_model(Z, adjmat_t, Y):
 		return lambda0 + lambda1*Z + lambda2*np.array(Y*adjmat_t)/D + np.random.normal(0, 1, N)
-	for i in range(10):
+	for i in range(20):
 		Y = outcome_model(Z, adjmat_t, Y)
+	return Y.reshape(-1)
+
+def _outcome_generator_undirected(graph, Z, adjmat):
+	graph_u = graph.to_undirected()
+	adjmat_u = nx.adjacency_matrix(graph_u)
+	N = adjmat_u.shape[0]
+	lambda0 = np.array([0.1] * N)
+	lambda1 = 0.5
+	lambda2 = 0.5
+	D = np.array([graph_u.degree(i) for i in range(N)])
+	D += (D == 0).astype(int)
+	Y = np.matrix([0] * N)
+	def outcome_model(Z, adjmat, Y):
+		return lambda0 + lambda1*Z + lambda2*np.array(Y*adjmat)/D + np.random.normal(0, 1, N)
+	for i in range(20):
+		Y = outcome_model(Z, adjmat_u, Y)
 	return Y.reshape(-1)

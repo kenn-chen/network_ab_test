@@ -28,9 +28,11 @@ if __name__ == "__main__":
 	parser.add_argument('-g', '--graph', metavar='random graph type', dest="graph_type", default="scale_free")
 	parser.add_argument('-o', '--output', metavar='result file', dest="outputfile", default="results/ate.csv")
 	parser.add_argument('-M', '--method', metavar='method', dest="method", default="baseline1")
+	parser.add_argument('-u', '--undirected', action="store_true", dest="undirected")
 
 	args = parser.parse_args()
 	config.dynamic["outputfile"] = args.outputfile
+	config.dynamic["undirected"] = args.undirected
 
 	if args.inputfile:
 		graph_name = args.inputfile.split("/")[1].split(".")[0]
