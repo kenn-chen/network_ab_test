@@ -22,8 +22,6 @@ def write_result(model, method, graph, true_ate, estimated_ate):
 
 
 if __name__ == "__main__":
-	np.seterr(divide='ignore', invalid='ignore')
-
 	parser = argparse.ArgumentParser(description='Causal inference estimation.')
 	parser.add_argument('-f', '--file', metavar='input graph', dest="inputfile")
 	parser.add_argument('-m', '--model', metavar='estimation model', dest="model", default="linear1")

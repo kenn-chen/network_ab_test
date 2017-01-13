@@ -36,7 +36,7 @@ def load_graph(graph_type="barabasi_albert", path=None):
 
 
 def treated_proportion(Z, adjmat):
-	return np.array(np.matrix(Z) * adjmat)
+	return np.array(np.matrix(Z) * adjmat.T)
 
 
 def outcome_generator(graph, Z, adjmat):
@@ -44,11 +44,12 @@ def outcome_generator(graph, Z, adjmat):
 	lambda0 = np.array([0.1] * N)
 	lambda1 = 0.5
 	lambda2 = 0.5
-	D = np.array([graph.in_degree(i) for i in range(N)])
+	D = np.array([graph.out_degree(i) for i in range(N)])
+	D += (D == 0).astype(int)
+	adjmat_t = adjmat.T
 	Y = np.matrix([0] * N)
-	def outcome_model(Z, adjmat, Y):
-		network_effect = np.nan_to_num(lambda2*np.array(Y*adjmat)/D)
-		return lambda0 + lambda1*Z + network_effect + np.random.normal(0, 1, N)
+	def outcome_model(Z, adjmat_t, Y):
+		return lambda0 + lambda1*Z + lambda2*np.array(Y*adjmat_t)/D + np.random.normal(0, 1, N)
 	for i in range(10):
-		Y = outcome_model(Z, adjmat, Y)
+		Y = outcome_model(Z, adjmat_t, Y)
 	return Y.reshape(-1)

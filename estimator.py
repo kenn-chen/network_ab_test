@@ -97,8 +97,29 @@ def _estimate_baseline2(graph, adjmat, model):
 	return true_ate, estimated_ate
 
 
+def estimate_weighted(graph, adjmat):
+	N = graph.number_of_nodes()
+	graph_u = graph.to_undirected()
+	Z = _sampling(graph, "linear1")
+	outcome = util.outcome_generator(graph, Z, adjmat)
+	true_ate = _get_true_ate(graph, adjmat)
+	adjmat_t = adjmat.T
+	D = np.array([graph.out_degree(i) for i in range(N)])
+	D += (D == 0).astype(int)
+	Z = Z.astype('float64')
+	alpha = 0.5
+	for i in range(10):
+		W = Z + alpha/(1+alpha)/D*(np.array(np.matrix(Z)*adjmat_t).reshape(-1))
+	C = 1+alpha-W
+	W, C, outcome = np.array(W), np.array(C), np.array(outcome)
+	ate = sum(W*outcome)/N - sum(C*outcome)/N
+	print(W)
+	return true_ate, ate
+
 def estimate(graph, adjmat, model="uniform", method="baseline1"):
 	if method == "baseline1":
 		return _estimate_baseline1(graph, adjmat, model)
 	elif method == "baseline2":
 		return _estimate_baseline2(graph, adjmat, model)
+	elif method == "weighted":
+		return estimate_weighted(graph, adjmat)
