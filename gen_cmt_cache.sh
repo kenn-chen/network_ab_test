@@ -17,6 +17,6 @@ if [ ! -f logs/gen.log ]; then
 fi
 
 ./exp.py -g scale_free -o results/temp.csv &>>logs/gen.log &
-./exp.py -f data/wiki-Vote.txt -o results/temp.csv &>>logs/gen.log &
-./exp.py -f data/soc-Epinions1.txt -o results/temp.csv &>>logs/gen.log &
-./exp.py -f data/soc-Slashdot0811.txt -o results/temp.csv &>>logs/gen.log &
+./exp.py -g wiki-Vote -o results/temp.csv &>>logs/gen.log &
+./exp.py -g data/soc-Epinions1 -o results/temp.csv &>>logs/gen.log &
+./exp.py -g data/soc-Slashdot0811 -o results/temp.csv &>>logs/gen.log &

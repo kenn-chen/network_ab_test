@@ -5,71 +5,90 @@ import numpy as np
 
 import config
 
-def save_graph(graph):
-	pickle.dump(graph, open(config.dynamic['graph_file'], "wb" ))
-
-
-def save_community(communities):
-	pickle.dump(communities, open(config.dynamic['community_file'], "wb" ))
-
-
-def load_graph(graph_type="barabasi_albert", path=None):
-	graph_file_exists = os.path.exists(config.dynamic["graph_file"])
-	if graph_file_exists:
-		print("Loading graph from cache...")
-		graph = pickle.load(open(config.dynamic["graph_file"], "rb"))
-	elif path:
-		print("Loading graph from file: %s..." % path)
-		graph = nx.convert_node_labels_to_integers(nx.read_edgelist(path, create_using=nx.DiGraph()))
+def get_file_path(filetype, **kargs):
+	if filetype == "graph_file":
+		assert "graph_name" in kargs, "Argument error"
+		return "data/" + kargs["graph_name"] + ".txt"
+	elif filetype == "community_cache":
+		assert "community_type" in kargs and "graph_name" in kargs, "Argument error"
+		return "caches/" + kargs["graph_name"] + "_" + kargs["community_type"] + "_community.pickle"
+	elif filetype == "graph_cache":
+		assert "graph_name" in kargs, "Argument error"
+		return "caches/" + kargs["graph_name"] + "_graph.pickle"
 	else:
-		if graph_type == "barabasi_albert":
-			print("Generating barabasi_albert graph...")
-			graph = nx.barabasi_albert_graph(config.graph['node_size'], 2)
-		elif graph_type == "scale_free":
-			print("Generating scale_free graph...")
-			graph = nx.scale_free_graph(config.graph['node_size'])
+		raise Exception("file type error")
+
+def save_graph(graph, graph_name):
+	graph_cache_path = get_file_path("graph_cache", graph_name=graph_name)
+	pickle.dump(graph, open(graph_cache_path, "wb" ))
+
+
+def save_community(communities, graph_name, community_type):
+	community_cache_path = get_file_path("community_cache", graph_name=graph_name, community_type=community_type)
+	pickle.dump(communities, open(community_cache_path, "wb" ))
+
+
+def load_graph(graph_name):
+	graph_cache_path = get_file_path("graph_cache", graph_name=graph_name)
+	graph_cache_exists = os.path.exists(graph_cache_path)
+	if graph_cache_exists:
+		print("Loading graph from cache...")
+		graph = pickle.load(open(graph_cache_path, "rb"))
+	elif graph_name == "barabasi_albert":
+		print("Generating barabasi_albert graph...")
+		graph = nx.barabasi_albert_graph(config.graph['node_size'], 2)
+	elif graph_name == "scale_free":
+		print("Generating scale_free graph...")
+		graph = nx.scale_free_graph(config.graph['node_size'])
+	else:
+		graph_file_path = get_file_path("graph_file", graph_name=graph_name)
+		assert os.path.exists(graph_file_path), "Graph specified not exists"
+		print("Loading graph from file: %s..." % graph_file_path)
+		graph = nx.convert_node_labels_to_integers(nx.read_edgelist(graph_file_path, create_using=nx.DiGraph()))
 	adjmat = nx.adjacency_matrix(graph)
-	if not graph_file_exists:
+	if not graph_cache_exists:
 		print("Saving graph...")
-		save_graph(graph)
+		save_graph(graph, graph_name)
+	return graph, adjmat
+
+
+def transform(graph, adjmat, directed):
+	if graph.is_directed() and not directed:
+		graph = graph.to_undirected()
+		adjmat = nx.adjacency_matrix(graph)
+	elif graph.is_undirected() and directed:
+		graph = graph.to_directed()
+		adjmat = nx.adjacency_matrix(graph)
+	elif adjmat == None:
+		adjmat = nx.adjacency_matrix(graph)
 	return graph, adjmat
 
 
 def treated_proportion(Z, adjmat):
-	return np.array(np.matrix(Z) * adjmat)
+	assert type(Z) == np.ndarray and Z.ndim == 1, "Z is not 1d array"
+	return np.array(Z.dot(adjmat.T)).reshape(-1)
 
 
-def outcome_generator(graph, Z, adjmat):
-	if config.dynamic["undirected"] == True:
-		return _outcome_generator_undirected(graph, Z, adjmat)
+def outcome_generator(graph, Z, adjmat, is_directed=True):
+	assert type(Z) == np.ndarray and Z.ndim == 1, "Z is not 1d array"
+	graph, adjmat = transform(graph, adjmat, is_directed)
+	if graph.is_undirected():
+		degrees = [d for _,d in graph.degree()]
+	else:
+		degrees = [d for _,d in graph.out_degree()]
 	N = adjmat.shape[0]
-	lambda0 = np.array([config.parameter['lambda0']] * N)
+	lambda0 = config.parameter['lambda0']
 	lambda1 = config.parameter['lambda1']
 	lambda2 = config.parameter['lambda2']
-	D = np.array([graph.out_degree(i) for i in range(N)])
-	D += (D == 0).astype(int)
-	adjmat_t = adjmat.T
-	Y = np.matrix([0] * N)
-	def outcome_model(Z, adjmat_t, Y):
-		Y = lambda0 + lambda1*Z + lambda2*np.array(Y*adjmat_t)/D + np.random.normal(0, 1, N)
-		return (Y > 0).astype(int)
-	for i in range(20):
-		Y = outcome_model(Z, adjmat_t, Y)
-	return Y.reshape(-1)
-
-def _outcome_generator_undirected(graph, Z, adjmat):
-	graph_u = graph.to_undirected()
-	adjmat_u = nx.adjacency_matrix(graph_u)
-	N = adjmat_u.shape[0]
-	lambda0 = np.array([config.parameter['lambda0']] * N)
-	lambda1 = config.parameter['lambda1']
-	lambda2 = config.parameter['lambda2']
-	D = np.array([graph_u.degree(i) for i in range(N)])
-	D += (D == 0).astype(int)
-	Y = np.matrix([0] * N)
+	D = np.array(degrees)
+	D[D==0] = 1
+	Y = np.zeros(N)
 	def outcome_model(Z, adjmat, Y):
-		Y = lambda0 + lambda1*Z + lambda2*np.array(Y*adjmat)/D + np.random.normal(0, 1, N)
-		return (Y > 0).astype(int)
-	for i in range(20):
-		Y = outcome_model(Z, adjmat_u, Y)
-	return Y.reshape(-1)
+		tmp = Y.dot(adjmat.T).reshape(-1)
+		Y = lambda0 + lambda1*Z + lambda2*tmp/D + np.random.normal(0, 1, N)
+		Y[Y > 0] = 1
+		return Y
+	for _ in range(config.parameter["iter_round"]):
+		Y = outcome_model(Z, adjmat, Y)
+	assert Y.ndim == 1, "outcome is not 1d array"
+	return Y

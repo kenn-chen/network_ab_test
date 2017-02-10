@@ -23,27 +23,17 @@ def write_result(model, method, graph, true_ate, estimated_ate):
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Causal inference estimation.')
-	parser.add_argument('-f', '--file', metavar='input graph', dest="inputfile")
 	parser.add_argument('-m', '--model', metavar='estimation model', dest="model", default="linear1")
-	parser.add_argument('-g', '--graph', metavar='random graph type', dest="graph_type", default="scale_free")
+	parser.add_argument('-g', '--graph', metavar='graph type', dest="graph_name", default="scale_free")
 	parser.add_argument('-o', '--output', metavar='result file', dest="outputfile", default="results/ate.csv")
 	parser.add_argument('-M', '--method', metavar='method', dest="method", default="baseline1")
-	parser.add_argument('-u', '--undirected', action="store_true", dest="undirected")
 
 	args = parser.parse_args()
 	config.dynamic["outputfile"] = args.outputfile
-	config.dynamic["undirected"] = args.undirected
 
-	if args.inputfile:
-		graph_name = args.inputfile.split("/")[1].split(".")[0]
-		config.dynamic["community_file"] = "caches/" + graph_name + "_community.pickle"
-		config.dynamic["graph_file"] = "caches/" + graph_name + "_graph.pickle"
-		graph, adjmat = util.load_graph(path=args.inputfile)
-	else:
-		graph_name = args.graph_type
-		config.dynamic["community_file"] = "caches/" + args.graph_type + "_community.pickle"
-		config.dynamic["graph_file"] = "caches/" + args.graph_type + "_graph.pickle"
-		graph, adjmat = util.load_graph(graph_type=args.graph_type)
+	graph_name = args.graph_name
+	config.dynamic["graph_name"] = graph_name
+	graph, adjmat = util.load_graph(graph_name)
 
 	print("Starting estimating...")
 	true_ate, estimated_ate = estimate(graph, adjmat, args.model, args.method)
