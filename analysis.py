@@ -14,7 +14,7 @@ def stats(filename):
 			results[name].append((true_ate, estimated_ate))
 	for name, value in results.items():
 		rmse = np.sqrt(np.mean([(float(x1)-float(x2))**2 for x1,x2 in value]))
-		bias = np.mean([abs(float(x1)-float(x2)) for x1,x2 in value])
+		bias = np.mean([float(x1)-float(x2) for x1,x2 in value])
 		var = np.var([float(x1) for x1,x2 in value])
 		print("rmse->%.6f\tbias->%.6f\tvar->%.6f: %s" % (rmse, bias, var, name))
 
