@@ -150,4 +150,4 @@ def estimate(graph, adjmat, model="uniform", method="baseline1"):
 	elif method == "weighted":
 		return _estimate_weighted(graph, adjmat)
 	else:
-		raise Exception("method provided not exists")
+		raise Exception("method provided (%s) not exists" % method)
