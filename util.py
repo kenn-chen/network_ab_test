@@ -87,6 +87,7 @@ def outcome_generator(graph, Z, adjmat, is_directed=True):
 		tmp = Y * adjmat.T #1d array * sparse matrix produces dot product
 		Y = lambda0 + lambda1*Z + lambda2*tmp/D + np.random.normal(0, 1, N)
 		Y[Y > 0] = 1
+		Y[Y < 0] = 0
 		return Y
 	for _ in range(config.parameter["iter_round"]):
 		Y = outcome_model(Z, adjmat, Y)
