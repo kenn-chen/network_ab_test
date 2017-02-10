@@ -116,7 +116,7 @@ def _label_propogation(graph, labels):
 
 def clustering(graph, k, is_directed=False):
 	print("Starting balanced partition...")
-	graph, adjmat = util.transform(graph, adjmat, is_directed)
+	graph, adjmat = util.transform(graph, None, is_directed)
 	labels = _init_partition(graph, k)
 	assert Counter(labels).keys() == k, "partition initialization error"
 	labels = _label_propogation(graph, labels)

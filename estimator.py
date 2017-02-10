@@ -52,27 +52,30 @@ def _estimate_lm2(Z, sigma, outcome):
 	return alpha1 + gamma1 - alpha0
 
 
-def _sampling(graph, model="uniform", is_directed=False):
+def _sampling(graph, community_type, model="uniform", is_directed=False):
 	if model == "uniform":
 		return np.random.binomial(1, 0.5, graph.number_of_nodes())
 	elif model == "linear1" or model == "linear2":
 		N = graph.number_of_nodes()
 		Z = np.empty(N)
-		if os.path.exists(config.dynamic['community_file']):
+		community_cache_path = util.get_file_path("community_cache", graph_name=config.dynamic["graph_name"], community_type=community_type)
+		if os.path.exists(community_cache_path):
 			print("Loading communities from cache...")
-			communities = pickle.load(open(config.dynamic['community_file'], "rb"))
+			communities = pickle.load(open(community_cache_path, "rb"))
 		else:
 			communities = bp.clustering(graph, config.graph['partition_size'], is_directed)
-			util.save_community(communities)
+			util.save_community(communities, config.dynamic["graph_name"], community_type)
 		for cmt in communities:
 			assignment = np.random.binomial(1, 0.5)
 			for node in cmt:
 				Z[node] = assignment
 		return Z
+	else:
+		raise Exception("model specified not exists")
 
 #partitioning as undirected
 def _estimate_baseline1(graph, adjmat, model):
-	Z = _sampling(graph, model, is_directed=False)
+	Z = _sampling(graph, "1", model, is_directed=False)
 	outcome = util.outcome_generator(graph, Z, adjmat, is_directed=True)
 	true_ate = _get_true_ate(graph, adjmat)
 	if model == "uniform":
@@ -88,7 +91,7 @@ def _estimate_baseline1(graph, adjmat, model):
 #remove edges without reverse edge
 def _estimate_baseline2(graph, adjmat, model):
 	graph_r, adjmat_r = _remove_unidirectional_edges(adjmat)
-	Z = _sampling(graph_r, model, is_directed=False)
+	Z = _sampling(graph_r, "2", model, is_directed=False)
 	outcome = util.outcome_generator(graph, Z, adjmat, is_directed=True)
 	true_ate = _get_true_ate(graph, adjmat)
 	if model == "uniform":
@@ -102,10 +105,24 @@ def _estimate_baseline2(graph, adjmat, model):
 	return true_ate, estimated_ate
 
 
+def _estimate_baseline3(graph, adjmat, model):
+	Z = _sampling(graph, "3", model, is_directed=True)
+	outcome = util.outcome_generator(graph, Z, adjmat, is_directed=True)
+	true_ate = _get_true_ate(graph, adjmat)
+	if model == "uniform":
+		estimated_ate = np.mean(outcome[Z==1]) - np.mean(outcome[Z==0])
+	elif model == "linear1":
+		sigma = util.treated_proportion(Z, adjmat)
+		estimated_ate = _estimate_lm1(Z, sigma, outcome)
+	elif model == "linear2":
+		sigma = util.treated_proportion(Z, adjmat)
+		estimated_ate = _estimate_lm2(Z, sigma, outcome)
+	return true_ate, estimated_ate
+
 def _estimate_weighted(graph, adjmat):
 	N = graph.number_of_nodes()
 	graph_u = graph.to_undirected()
-	Z = _sampling(graph, "linear1")
+	Z = _sampling(graph, "linear1") #todo:...
 	outcome = util.outcome_generator(graph, Z, adjmat)
 	true_ate = _get_true_ate(graph, adjmat)
 	adjmat_t = adjmat.T
@@ -128,6 +145,8 @@ def estimate(graph, adjmat, model="uniform", method="baseline1"):
 		return _estimate_baseline1(graph, adjmat, model)
 	elif method == "baseline2":
 		return _estimate_baseline2(graph, adjmat, model)
+	elif method == "baseline3":
+		return _estimate_baseline3(graph, adjmat, model)
 	elif method == "weighted":
 		return _estimate_weighted(graph, adjmat)
 	else:
