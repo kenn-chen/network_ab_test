@@ -75,7 +75,7 @@ def outcome_generator(graph, Z, adjmat, is_directed=True):
 	if graph.is_directed():
 		degrees = [d for _,d in graph.out_degree()]
 	else:
-		degrees = [d for _,d in graph.degree()]	
+		degrees = [d for _,d in graph.degree()]
 	N = adjmat.shape[0]
 	lambda0 = config.parameter['lambda0']
 	lambda1 = config.parameter['lambda1']
@@ -84,7 +84,7 @@ def outcome_generator(graph, Z, adjmat, is_directed=True):
 	D[D==0] = 1
 	Y = np.zeros(N)
 	def outcome_model(Z, adjmat, Y):
-		tmp = Y.dot(adjmat.T).reshape(-1)
+		tmp = Y * adjmat.T #1d array * sparse matrix produces dot product
 		Y = lambda0 + lambda1*Z + lambda2*tmp/D + np.random.normal(0, 1, N)
 		Y[Y > 0] = 1
 		return Y
