@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
-if [ ! -d cache ]; then
-	mkdir 'cache'
+if [ ! -d caches ]; then
+	mkdir 'caches'
 fi
 
 if [ ! -d logs ]; then

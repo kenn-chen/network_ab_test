@@ -13,6 +13,6 @@ dynamic = dict(
 
 parameter = dict(
 	lambda0 = 0.1,
-	lambda1 = 0.6,
-	lambda2 = 0.3,
+	lambda1 = 0.5,
+	lambda2 = 0.5,
 )
