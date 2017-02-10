@@ -25,7 +25,7 @@ def _init_partition(graph, k):
 	step = math.ceil(N / k)
 	label = 0
 	for i in range(0, N, step):
-		end = i + step if i+step < N else N
+		end = min(i+step, N)
 		labels[i:end] = label
 		label += 1
 	return labels
@@ -118,7 +118,7 @@ def clustering(graph, k, is_directed=False):
 	print("Starting balanced partition...")
 	graph, adjmat = util.transform(graph, None, is_directed)
 	labels = _init_partition(graph, k)
-	assert Counter(labels).keys() == k, "partition initialization error"
+	assert len(Counter(labels).keys()) == k, "partition initialization error"
 	labels = _label_propogation(graph, labels)
 	labels = {node:label for node,label in enumerate(labels)}
 	print("Partitioning finished.")
