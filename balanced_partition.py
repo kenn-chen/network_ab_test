@@ -22,11 +22,15 @@ def _neighbors(graph, node):
 def _init_partition(graph, k):
 	N = graph.number_of_nodes()
 	labels = np.zeros(N)
-	step = math.ceil(N / k)
+	step = N // k
 	label = 0
 	for i in range(0, N, step):
-		end = min(i+step, N)
+		end = i + step
 		labels[i:end] = label
+		label += 1
+	label = 0
+	for i in range(step*k, N):
+		labels[i] = label
 		label += 1
 	return labels
 

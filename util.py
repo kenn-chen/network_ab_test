@@ -56,7 +56,7 @@ def transform(graph, adjmat, directed):
 	if graph.is_directed() and not directed:
 		graph = graph.to_undirected()
 		adjmat = nx.adjacency_matrix(graph)
-	elif graph.is_undirected() and directed:
+	elif not graph.is_directed() and directed:
 		graph = graph.to_directed()
 		adjmat = nx.adjacency_matrix(graph)
 	elif adjmat == None:
