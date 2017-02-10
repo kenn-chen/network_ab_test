@@ -16,7 +16,11 @@ if [ ! -f logs/gen.log ]; then
 	touch 'logs/gen.log'
 fi
 
-./exp.py -g scale_free -o results/temp.csv &>>logs/gen.log &
-./exp.py -g wiki-Vote -o results/temp.csv &>>logs/gen.log &
-./exp.py -g data/soc-Epinions1 -o results/temp.csv &>>logs/gen.log &
-./exp.py -g data/soc-Slashdot0811 -o results/temp.csv &>>logs/gen.log &
+if [ ! -f logs/error.log ]; then
+	touch 'logs/error.log'
+fi
+
+./exp.py -g scale_free -o results/temp.csv >>logs/gen.log 2>>logs/error.log &
+./exp.py -g wiki-Vote -o results/temp.csv >>logs/gen.log 2>>logs/error.log&
+./exp.py -g soc-Epinions1 -o results/temp.csv >>logs/gen.log 2>>logs/error.log&
+./exp.py -g soc-Slashdot0811 -o results/temp.csv >>logs/gen.log 2>>logs/error.log&

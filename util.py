@@ -72,10 +72,10 @@ def treated_proportion(Z, adjmat):
 def outcome_generator(graph, Z, adjmat, is_directed=True):
 	assert type(Z) == np.ndarray and Z.ndim == 1, "Z is not 1d array"
 	graph, adjmat = transform(graph, adjmat, is_directed)
-	if graph.is_undirected():
-		degrees = [d for _,d in graph.degree()]
-	else:
+	if graph.is_directed():
 		degrees = [d for _,d in graph.out_degree()]
+	else:
+		degrees = [d for _,d in graph.degree()]	
 	N = adjmat.shape[0]
 	lambda0 = config.parameter['lambda0']
 	lambda1 = config.parameter['lambda1']
