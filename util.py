@@ -66,7 +66,7 @@ def transform(graph, adjmat, directed):
 
 def treated_proportion(Z, adjmat):
 	assert type(Z) == np.ndarray and Z.ndim == 1, "Z is not 1d array"
-	return np.array(Z.dot(adjmat.T)).reshape(-1)
+	return Z * adjmat.T
 
 
 def outcome_generator(graph, Z, adjmat, is_directed=True):
