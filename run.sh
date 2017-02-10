@@ -16,7 +16,7 @@ if [ ! -f logs/error.log ]; then
 	touch 'logs/error.log'
 fi
 
-methods=('baseline1' 'baseline2', 'baseline3')
+methods=('baseline1' 'baseline2' 'baseline3')
 models=('uniform' 'linear1')
 graphs=('-g scale_free' '-g wiki-Vote' '-g soc-Epinions1' '-g soc-Slashdot0811')
 for M in $methods
