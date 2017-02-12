@@ -1,31 +1,35 @@
 #!/usr/bin/env zsh
 
-if [ ! -d results ]; then
+if [[ -d logs ]]; then
+	rm -rf logs
+fi
+
+mkdir logs
+touch 'logs/run.log'
+touch 'logs/error.log'
+
+if [[ ! -d results ]]; then
 	mkdir results
 fi
 
-if [ ! -d logs ]; then
-	mkdir logs
-fi
-
-if [ ! -f logs/run.log ]; then
-	touch 'logs/run.log'
-fi
-
-if [ ! -f logs/error.log ]; then
-	touch 'logs/error.log'
+if [[ "$1" == "-b" ]]; then
+	b="-b"
+	outout="results/b_ate.csv"
+else
+	b=""
+	output="results/ate.csv"
 fi
 
 methods=('baseline1' 'baseline2' 'baseline3')
-models=('uniform' 'linear1')
-graphs=('-g scale_free' '-g wiki-Vote' '-g soc-Epinions1' '-g soc-Slashdot0811')
+models=('uniform' 'linear1' 'linear2')
+graphs=('growing_network' 'scale_free' 'wiki-Vote' 'soc-Epinions1' 'soc-Slashdot0811')
 for M in $methods
 do
 	for m in $models
 	do
 		for g in $graphs
 		do
-			eval "./exp.py -M $M -m $m $g >>logs/run.log 2>>logs/error.log &"
+			eval "./main.py -M $M -m $m -o $output -g $g $b >>logs/run.log 2>>logs/error.log &"
 		done
 	done
 done

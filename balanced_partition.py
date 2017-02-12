@@ -118,11 +118,11 @@ def _label_propogation(graph, labels):
 	return labels
 
 
-def clustering(graph, k, is_directed=False):
+def clustering(graph, k):
 	print("Starting balanced partition...")
-	graph, adjmat = util.transform(graph, None, is_directed)
+	adjmat = nx.adjacency_matrix(graph)
 	labels = _init_partition(graph, k)
-	assert len(Counter(labels).keys()) == k, "partition initialization error"
+	assert len(Counter(labels).keys()) == k, "Partition initialization error"
 	labels = _label_propogation(graph, labels)
 	labels = {node:label for node,label in enumerate(labels)}
 	print("Partitioning finished.")

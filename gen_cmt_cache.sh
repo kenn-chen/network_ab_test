@@ -1,26 +1,23 @@
 #!/usr/bin/env zsh
 
-if [ ! -d caches ]; then
-	mkdir 'caches'
+if [[ -d logs ]]; then
+	rm -rf logs
 fi
 
-if [ ! -d logs ]; then
-	mkdir 'logs'
+mkdir logs
+touch 'logs/run.log'
+touch 'logs/error.log'
+
+if [[ ! -d results ]]; then
+	mkdir results
 fi
 
-if [ ! -d results ]; then
-	mkdir 'results'
-fi
-
-if [ ! -f logs/gen.log ]; then
-	touch 'logs/gen.log'
-fi
-
-if [ ! -f logs/error.log ]; then
-	touch 'logs/error.log'
-fi
-
-./exp.py -g scale_free -o results/temp.csv >>logs/gen.log 2>>logs/error.log &
-./exp.py -g wiki-Vote -o results/temp.csv >>logs/gen.log 2>>logs/error.log&
-./exp.py -g soc-Epinions1 -o results/temp.csv >>logs/gen.log 2>>logs/error.log&
-./exp.py -g soc-Slashdot0811 -o results/temp.csv >>logs/gen.log 2>>logs/error.log&
+methods=('baseline1' 'baseline2' 'baseline3')
+graphs=('growing_network' 'scale_free' 'wiki-Vote' 'soc-Epinions1' 'soc-Slashdot0811')
+for M in $methods
+do
+	for g in $graphs
+	do
+		eval "./main.py -M $M -m linear1 -o results/tmp.csv -g $g >>logs/run.log 2>>logs/error.log &"
+	done
+done

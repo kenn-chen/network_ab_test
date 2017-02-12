@@ -3,7 +3,7 @@ pool = dict(
 )
 
 graph = dict(
-	node_size = 2000,
+	node_size = 20000,
 	partition_size = 100,
 )
 

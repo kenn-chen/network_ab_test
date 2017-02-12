@@ -27,13 +27,16 @@ if __name__ == "__main__":
 	parser.add_argument('-g', '--graph', metavar='graph type', dest="graph_name", default="scale_free")
 	parser.add_argument('-o', '--output', metavar='result file', dest="outputfile", default="results/ate.csv")
 	parser.add_argument('-M', '--method', metavar='method', dest="method", default="baseline1")
+	parser.add_argument('-b', '--binary', dest="binary", action='store_true')
 
 	args = parser.parse_args()
+	config.dynamic["binary"] = args.binary
 	config.dynamic["outputfile"] = args.outputfile
-
 	graph_name = args.graph_name
 	config.dynamic["graph_name"] = graph_name
+
 	graph, adjmat = util.load_graph(graph_name)
+	assert graph.__class__.__name__ == "DiGraph", "Graph isn't digraph"
 
 	print("Starting estimating...")
 	true_ate, estimated_ate = estimate(graph, adjmat, args.model, args.method)
