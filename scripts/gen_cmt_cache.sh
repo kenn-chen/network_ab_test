@@ -18,6 +18,6 @@ for M in $methods
 do
 	for g in $graphs
 	do
-		eval "./main.py -M $M -m linear1 -o results/tmp.csv -g $g >>logs/run.log 2>>logs/error.log &"
+		eval "../main.py -M $M -m linear1 -o results/tmp.csv -g $g >>logs/run.log 2>>logs/error.log &"
 	done
 done
