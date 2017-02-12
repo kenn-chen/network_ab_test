@@ -22,7 +22,7 @@ fi
 
 methods=('baseline1' 'baseline2' 'baseline3')
 models=('uniform' 'linear1' 'linear2')
-graphs=('growing_network' 'scale_free' 'wiki-Vote' 'soc-Epinions1' 'soc-Slashdot0811')
+graphs=('growing_network' 'wiki-Vote' 'soc-Epinions1' 'soc-Slashdot0811')
 for M in $methods
 do
 	for m in $models

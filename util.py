@@ -37,9 +37,9 @@ def load_graph(graph_name):
 	elif graph_name == "growing_network":
 		print("Generating gn_graph graph...")
 		graph = nx.gn_graph(config.graph['node_size'], create_using=nx.DiGraph())
-	elif graph_name == "scale_free":
-		print("Generating scale_free graph...")
-		graph = nx.scale_free_graph(config.graph['node_size'], create_using=nx.DiGraph())
+#	elif graph_name == "scale_free":
+#		print("Generating scale_free graph...")
+#		graph = nx.scale_free_graph(config.graph['node_size'], create_using=nx.DiGraph())
 	else:
 		graph_file_path = get_file_path("graph_file", graph_name=graph_name)
 		assert os.path.exists(graph_file_path), "Graph specified not exists"
