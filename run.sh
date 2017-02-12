@@ -14,7 +14,7 @@ fi
 
 if [[ "$1" == "-b" ]]; then
 	b="-b"
-	outout="results/b_ate.csv"
+	output="results/b_ate.csv"
 else
 	b=""
 	output="results/ate.csv"
