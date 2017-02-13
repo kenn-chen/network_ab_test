@@ -7,7 +7,8 @@ from sklearn import linear_model
 
 import config
 import util
-import balanced_partition as bp
+from balanced_partition import clustering
+from new_method import partition
 
 def _remove_unidirectional_edges(graph):
 	adjmat = nx.adjacency_matrix(graph)
@@ -43,7 +44,10 @@ def _sampling(graph, community_type, model):
 			print("Loading communities from cache...")
 			communities = pickle.load(open(community_cache_path, "rb"))
 		else:
-			communities = bp.clustering(graph, config.graph['partition_size'])
+			if community_type == 3:
+				communities = clustering(graph, config.graph['partition_size'])
+			elif community_type == 4:
+				communities = partition(graph)
 			util.save_community(communities, graph_name, community_type)
 		cnt = 0
 		for cmt in communities:
@@ -105,11 +109,11 @@ def _estimate_weighted(graph, adjmat):
 
 def estimate(graph, adjmat, model, method):
 	assert graph.__class__.__name__ == "DiGraph", "Graph isn't digraph"
-	assert method in ["baseline1", "baseline2", "baseline3", "weighted"], "Method provided (%s) not exists" % method
+	assert method in ["baseline1", "baseline2", "baseline3", "new", "weighted"], "Method provided (%s) not exists" % method
 	if method == "weighted":
 		return _estimate_weighted(graph, adjmat)
 
-	community_type = {"baseline1": 1, "baseline2": 2, "baseline3": 3}[method]
+	community_type = {"baseline1": 1, "baseline2": 2, "baseline3": 3, "new": 4}[method]
 	Z = _sampling(graph, community_type, model)
 	outcome = util.outcome_generator(graph, adjmat, Z)
 	true_ate = _get_true_ate(graph, adjmat)

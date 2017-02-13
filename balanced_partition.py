@@ -118,7 +118,7 @@ def _label_propogation(graph, labels):
 	return labels
 
 
-def clustering(graph, k):
+def clustering(graph, k, return_label=False):
 	print("Starting balanced partition...")
 	adjmat = nx.adjacency_matrix(graph)
 	labels = _init_partition(graph, k)
@@ -126,4 +126,7 @@ def clustering(graph, k):
 	labels = _label_propogation(graph, labels)
 	labels = {node:label for node,label in enumerate(labels)}
 	print("Partitioning finished.")
-	return iter(groups(labels).values())
+	if return_label:
+		return labels
+	else:
+		return iter(groups(labels).values())

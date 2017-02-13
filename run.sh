@@ -20,7 +20,7 @@ else
 	output="results/ate.csv"
 fi
 
-methods=('baseline1' 'baseline2' 'baseline3')
+methods=('baseline1' 'baseline2' 'baseline3', 'new')
 models=('uniform' 'linear1')
 graphs=('growing_network' 'wiki-Vote' 'soc-Epinions1' 'soc-Slashdot0811')
 for M in $methods
