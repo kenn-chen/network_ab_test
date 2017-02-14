@@ -1,35 +1,38 @@
 #!/usr/bin/env zsh
 
-if [[ -d logs ]]; then
-	rm -rf logs
-fi
-
-mkdir logs
-touch 'logs/run.log'
-touch 'logs/error.log'
-
 if [[ ! -d results ]]; then
 	mkdir results
 fi
 
-if [[ "$1" == "-b" ]]; then
-	b="-b"
-	output="results/b_ate.csv"
-else
-	b=""
-	output="results/ate.csv"
+if [[ ! -d logs ]]; then
+	mkdir logs
 fi
 
+if [[ ! -f logs/run.log ]]; then
+	touch 'logs/run.log'
+fi
+
+if [[ ! -f logs/error.log ]]; then
+	touch 'logs/error.log'
+fi
+
+lambda1=(0 0.25 0.75 1)
+lambda2=(0 0.1 0.5 1)
 methods=('baseline1' 'baseline2' 'baseline3', 'new')
 models=('uniform' 'linear1')
 graphs=('growing_network' 'wiki-Vote' 'soc-Epinions1' 'soc-Slashdot0811')
-for M in $methods
-do
-	for m in $models
-	do
-		for g in $graphs
-		do
-			eval "./main.py -M $M -m $m -o $output -g $g $b >>logs/run.log 2>>logs/error.log &"
+for l1 in $lambda1; do
+	for l2 in $lambda2; do
+
+		for M in $methods; do
+			for m in $models; do
+				for g in $graphs; do
+					eval "./main.py -l1 $l1 -l2 $l2 -M $M -m $m -g $g $b >>logs/run.log 2>>logs/error.log &"
+				done
+			done
 		done
+
+		sleep 90
+
 	done
 done
