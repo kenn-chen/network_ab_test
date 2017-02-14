@@ -18,7 +18,7 @@ fi
 
 lambda1=(0 0.25 0.75 1)
 lambda2=(0 0.1 0.5 1)
-methods=('baseline1' 'baseline2' 'baseline3', 'new')
+methods=('baseline1' 'baseline2' 'baseline3' 'new')
 models=('uniform' 'linear1')
 graphs=('growing_network' 'wiki-Vote' 'soc-Epinions1' 'soc-Slashdot0811')
 for l1 in $lambda1; do
