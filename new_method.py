@@ -5,6 +5,8 @@ from networkx.utils import groups
 import util
 from balanced_partition import clustering
 
+import sys
+
 
 def partition(graph):
 	core_nodes = {node:True for node,degree in graph.in_degree() if degree>=10}
@@ -32,6 +34,9 @@ def partition(graph):
 			label = Counter(nbr_labels).most_common(1)[0][0]
 			labels[node] = label
 
-	communities = iter(groups(labels).values())
-	#x = [len(c) for c in sorted(communities, key=len, reverse=True)]
-	return communities
+	#communities = iter(groups(labels).values())
+	communities = groups(labels).values()
+	x = [len(c) for c in sorted(communities, key=len, reverse=True)]
+	#return communities
+	print(x)
+	sys.exit(0)
