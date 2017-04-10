@@ -61,7 +61,8 @@ def get_kernels(graph):
 	weights, weight_rank = get_weights(graph)
 	N = graph.number_of_nodes()
 
-	iter_round = N // 1000
+	iter_round = 200
+	cluster_size = N // iter_round
 	seed_node_range = int(N // 10)
 	kernels = []
 	selected_nodes = set()
@@ -76,8 +77,7 @@ def get_kernels(graph):
 
 		success = True
 		total_weights = weights[seed_node]
-		while total_weights < 1000:
-			#print(total_weights)
+		while total_weights < cluster_size:
 			found = False
 			ranked_followees = [node for node, _ in sorted(followees.items(), key=lambda x: x[1], reverse=True)]
 			for followee in ranked_followees:
@@ -101,7 +101,7 @@ def clustering(graph):
 	return clusters
 
 if __name__ == "__main__":
-	graph_file = "data/soc-Epinions1.txt"
+	graph_file = "data/wiki-Vote.txt"
 	graph = get_graph(graph_file)
 	kernels = get_kernels(graph)
 	clusters = majority_vote(graph, kernels)
