@@ -70,6 +70,7 @@ def outcome_generator(graph, adjmat, Z):
 	D = np.array(degrees)
 	D[D==0] = 1
 	Y = np.zeros(N)
+	global traits
 	if traits is None:
 		traits = np.random.normal(0, 1, N)
 	def outcome_model(adjmat, Z, Y):
