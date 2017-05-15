@@ -6,15 +6,16 @@ import matplotlib.pyplot as plt
 
 def result_plot():
 	graphs = ['growing_network', 'wiki-Vote', 'soc-Epinions1', 'soc-Slashdot0811']
-	#graphs = ["wiki-Vote"]
 	for graph in graphs:
 		plt.figure(graph)
 		plt.subplots_adjust(hspace = 0.4)
 		plt.subplots_adjust(wspace = 0.3)
 		data = defaultdict(lambda: defaultdict(list))
-		with open("results/"+graph) as fin:
+		filename = "results/%s.csv" % graph
+		with open(filename) as fin:
+			fin.readline()
 			for line in fin:
-				lambda1, lambda2, rmse, _, _, method = line.split()
+				model, method, lambda1, lambda2, RMSE, bias, variance = line.split(',')
 				if method == "new":
 					method = "Proposed"
 				elif method == "baseline1":
@@ -23,7 +24,9 @@ def result_plot():
 					continue
 				elif method == "baseline3":
 					method = "Baseline2"
-				data[float(lambda2)][method].append((float(lambda1), rmse))
+				elif method == "greedybp":
+					method = "GreedyBP"
+				data[float(lambda2)][method].append((float(lambda1), RMSE))
 
 		cnt = 0
 		for lambda2 in sorted(data.keys()):
@@ -37,9 +40,9 @@ def result_plot():
 				points.sort(key=lambda x: x[0])
 				plt.plot(*zip(*points), marker='o', linestyle="--", label=method)
 			legend = plt.legend(loc='upper left', prop={'size':10})
-			plt.savefig(graph+'.svg', format='svg', dpi=100)
+			#plt.savefig(graph+'.svg', format='svg', dpi=100)
 
-	#plt.show()
+	plt.show()
 
 
 def community_plot():
