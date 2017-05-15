@@ -5,6 +5,8 @@ import numpy as np
 
 import config
 
+traits = None
+
 def get_file_path(filetype, **kargs):
 	if filetype == "graph_file":
 		assert "graph_name" in kargs, "Argument error"
@@ -68,18 +70,13 @@ def outcome_generator(graph, adjmat, Z):
 	D = np.array(degrees)
 	D[D==0] = 1
 	Y = np.zeros(N)
-	traits = np.random.normal(0, 1, N)
+	if traits is None:
+		traits = np.random.normal(0, 1, N)
 	def outcome_model(adjmat, Z, Y):
 		tmp = Y * adjmat.T #1d array * sparse matrix produces dot product
 		Y = lambda0 + lambda1*Z + lambda2*tmp/D + traits
-		#if config.dynamic["binary"]:
-		#	Y[Y > 0] = 1
-		#	Y[Y < 0] = 0
 		return Y
 	for _ in range(config.parameter["iter_round"]):
 		Y = outcome_model(adjmat, Z, Y)
-		#Y0 = outcome_model(adjmat, Z, Y)
-		#print(np.mean(Y0-Y))
-		#Y = Y0
 	assert Y.ndim == 1, "outcome is not 1d array"
 	return Y
