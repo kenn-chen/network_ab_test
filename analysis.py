@@ -5,15 +5,17 @@ import numpy as np
 import sys
 import os.path
 
+fouts = {}
+
 def write_result(graph, model, method, lambda1, lambda2, RMSE, bias, variance):
-	outputfile = "results/%s.csv" % graph
-	if not os.path.exists(outputfile):
-		with open(outputfile, 'w') as fout:
-			fout.write("model,method,lambda1,lambda2,RMSE,bias,variance\n")
-			fout.write("%s,%s,%.2f,%.2f,%f,%f,%f\n" % (model, method, lambda1, lambda2, RMSE, bias, variance))
+	if graph in fouts:
+		fout = fouts[graph]
 	else:
-		with open(outputfile, 'a') as fout:
-			fout.write("%s,%s,%.2f,%.2f,%f,%f,%f\n" % (model, method, lambda1, lambda2, RMSE, bias, variance))
+		outputfile = "results/%s.csv" % graph
+		fout = open(outputfile, 'w')
+		fout.write("model,method,lambda1,lambda2,RMSE,bias,variance\n")
+		fouts[graph] = fout
+	fout.write("%s,%s,%.2f,%.2f,%f,%f,%f\n" % (model, method, lambda1, lambda2, RMSE, bias, variance))
 
 def compute(lambda1, lambda2):
 	filename = "results/ate-%g-%g.csv" % (lambda1, lambda2)
@@ -37,3 +39,5 @@ if __name__ == "__main__":
 	for l1 in lambda1:
 		for l2 in lambda2:
 			compute(l1, l2)
+	for fout in fouts.values():
+		fout.close()

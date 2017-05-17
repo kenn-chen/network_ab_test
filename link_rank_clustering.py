@@ -17,79 +17,78 @@ from collections import defaultdict
 from networkx.exception import NetworkXError
 from networkx.utils import not_implemented_for
 
+from balanced_partition import BalancedPartition
+
 __all__ = ['pagerank', 'pagerank_numpy', 'pagerank_scipy', 'google_matrix']
 
 
-def _major_label(G, cluster, labels):
-	weights = defaultdict(float)
-	for node in cluster:
-		cur_label = labels[node]
-		for followee in G.successors(node):
-			label = labels[followee]
-			if label == cur_label: continue
-			weights[label] += G[node][followee]['weight']
-		for follower in G.predecessors(node):
-			label = labels[follower]
-			if label == cur_label: continue
-			weights[label] += G[follower][node]['weight']
-	return max(weights, key=lambda k: weights[k])
-
-
-def clustering(G, M):
-	N = G.number_of_nodes()
-	K = math.ceil(N / M)
-	labels = [-1] * N
-	counter = 0
-	clusters = defaultdict(set)
-	edges = ((u, v, data['weight']) for u, v, data in G.edges(data=True))
-	edges = sorted(edges, key=lambda x: x[2], reverse=True)
-	for u, v, w in edges:
-		lu, lv = labels[u], labels[v]
-		if lu == -1 and lv == -1:
-			label = counter
-			counter += 1
-			labels[u] = labels[v] = label
-			clusters[label].update([u, v])
-		elif lu != -1 and lv != -1:
-			if lu == lv or len(clusters[lu]) + len(clusters[lv]) > K:
-				continue
-			for node in clusters[lv]:
-				labels[node] = lu
-			clusters[lu] |= clusters[lv]
-			del clusters[lv]
-		elif lu != -1:
-			if len(clusters[lu]) >= K:
-				label = counter
-				counter += 1
-			else:
-				label = lu
-			labels[v] = label
-			clusters[label].add(v)
-		else:
-			if len(clusters[lv]) >= K:
-				label = counter
-				counter += 1
-			else:
-				label = lv
-			labels[u] = label
-			clusters[label].add(u)
-
-	deleted_clusters = []
-	for label, cluster in clusters.items():
-		if len(cluster) < K/2:
-			old_label = label
-			new_label = _major_label(G, cluster, labels)
-			for node in cluster:
-				labels[node] = new_label
-			clusters[new_label] |= cluster
-			deleted_clusters.append(old_label)
-	for label in deleted_clusters:
-		del clusters[label]
-
-	return clusters.values()
-
-
-
+# def _major_label(G, cluster, labels):
+# 	weights = defaultdict(float)
+# 	for node in cluster:
+# 		cur_label = labels[node]
+# 		for followee in G.successors(node):
+# 			label = labels[followee]
+# 			if label == cur_label: continue
+# 			weights[label] += G[node][followee]['weight']
+# 		for follower in G.predecessors(node):
+# 			label = labels[follower]
+# 			if label == cur_label: continue
+# 			weights[label] += G[follower][node]['weight']
+# 	return max(weights, key=lambda k: weights[k])
+#
+#
+# def clustering(G, M):
+# 	N = G.number_of_nodes()
+# 	K = math.ceil(N / M)
+# 	labels = [-1] * N
+# 	counter = 0
+# 	clusters = defaultdict(set)
+# 	edges = ((u, v, data['weight']) for u, v, data in G.edges(data=True))
+# 	edges = sorted(edges, key=lambda x: x[2], reverse=True)
+# 	for u, v, w in edges:
+# 		lu, lv = labels[u], labels[v]
+# 		if lu == -1 and lv == -1:
+# 			label = counter
+# 			counter += 1
+# 			labels[u] = labels[v] = label
+# 			clusters[label].update([u, v])
+# 		elif lu != -1 and lv != -1:
+# 			if lu == lv or len(clusters[lu]) + len(clusters[lv]) > K:
+# 				continue
+# 			for node in clusters[lv]:
+# 				labels[node] = lu
+# 			clusters[lu] |= clusters[lv]
+# 			del clusters[lv]
+# 		elif lu != -1:
+# 			if len(clusters[lu]) >= K:
+# 				label = counter
+# 				counter += 1
+# 			else:
+# 				label = lu
+# 			labels[v] = label
+# 			clusters[label].add(v)
+# 		else:
+# 			if len(clusters[lv]) >= K:
+# 				label = counter
+# 				counter += 1
+# 			else:
+# 				label = lv
+# 			labels[u] = label
+# 			clusters[label].add(u)
+#
+# 	deleted_clusters = []
+# 	for label, cluster in clusters.items():
+# 		if len(cluster) < K/2:
+# 			old_label = label
+# 			new_label = _major_label(G, cluster, labels)
+# 			for node in cluster:
+# 				labels[node] = new_label
+# 			clusters[new_label] |= cluster
+# 			deleted_clusters.append(old_label)
+# 	for label in deleted_clusters:
+# 		del clusters[label]
+#
+# 	return clusters.values()
 
 
 def linkrank(G):
@@ -129,26 +128,29 @@ def pagerank(G, alpha=0.85, max_iter=100, tol=1.0e-6):
 
 def google_matrix(G, alpha=0.85):
 	N = G.number_of_nodes()
-	M = nx.to_numpy_matrix(G)
-	dangling_nodes = np.where(M.sum(axis=1) == 0)[0]
-	# # Assign dangling_weights to any dangling nodes (nodes with no out links)
+	M = nx.adjacency_matrix(G)
+
+	sums = np.asarray(M.sum(axis=1)).reshape(-1)
+	dangling_nodes = np.where(sums == 0)[0]
 	for node in dangling_nodes:
 		r = random.randint(0, N-1)
 		M[node, r] = 1
-	#D = M.sum(axis=1)
-	#D[D==0] = 1
-	#M /= D  # Normalize rows to sum to 1
-	#GM = alpha * M + (1 - alpha) * p
-	M /= M.sum(axis=1)
-	return scipy.sparse.csr_matrix(M)
+		sums[node] = 1
+	divisor = scipy.sparse.diags(1 / sums)
+	M = divisor * M
+	return M
+
+
+def clustering(G, M):
+	G = linkrank(G)
+	BP = BalancedPartition(G, M, weighted=True)
+	return BP.clustering()
 
 
 if __name__ == "__main__":
-	graph_file = "data/soc-Slashdot0811.txt"
-	graph = nx.convert_node_labels_to_integers(nx.read_edgelist(graph_file, create_using=nx.DiGraph()))
-	graph = linkrank(graph)
-
-	x = linkrank.clustering(graph, 50)
-	x = [len(m) for m in x]
-	x.sort(reverse=True)
-	print(x)
+	graph_file = "data/wiki-Vote.txt"
+	G = nx.convert_node_labels_to_integers(nx.read_edgelist(graph_file, create_using=nx.DiGraph()))
+	G = linkrank(G)
+	BP = BalancedPartition(G, 50, weighted=True)
+	x = BP.clustering()
+	print(list(x))
