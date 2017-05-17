@@ -31,7 +31,7 @@ def _sampling(G, model, method):
 	N = G.number_of_nodes()
 	if method == "uniform":
 		return np.random.binomial(1, 0.5, N)
-	mapping = {"b1": 1, "b2": 2, "LRC": 3}
+	mapping = {"b1": 1, "LRC": 1}
 	cluster_type = mapping[method]
 	Z = np.empty(N)
 	name = config.dynamic["graph_name"]
@@ -40,7 +40,7 @@ def _sampling(G, model, method):
 		print("Loading clusters from cache...")
 		clusters = pickle.load(open(cluster_cache_path, "rb"))
 	else:
-		if cluster_type == mapping["b2"]:
+		if cluster_type == mapping["b1"]:
 			BP = BalancedPartition(G)
 			clusters = BP.clustering()
 		elif cluster_type == mapping["LRC"]:
