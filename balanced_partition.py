@@ -13,13 +13,13 @@ import config
 import util
 
 class BalancedPartition():
-	def __init__(self, G, M, weighted=False):
+	def __init__(self, G, weighted=False):
 		N = G.number_of_nodes()
 		if not weighted:
 			self.G = self.to_weighted(G)
 		else:
 			self.G = G
-		self.labels, self.clusters = self.init_partition(M)
+		self.labels, self.clusters = self.init_partition()
 		self.connections = self.get_connections()
 
 
@@ -34,8 +34,9 @@ class BalancedPartition():
 		return H
 
 
-	def init_partition(self, M):
+	def init_partition(self):
 		N = self.G.number_of_nodes()
+		M = int(N ** 0.5)
 		labels = np.zeros(N, dtype=int)
 		clusters = [set() for _ in range(M)]
 		step = N // M
@@ -131,7 +132,7 @@ class BalancedPartition():
 			self.change_label(node, new_label)
 
 
-	def iterate(self, max_iter=20):
+	def iterate(self, max_iter=15):
 		G, clusters, labels, connections = self.G, self.clusters, self.labels, self.connections
 		zscore = lambda arr: np.std(arr) / np.mean(arr)
 		N = G.number_of_nodes()
@@ -139,8 +140,8 @@ class BalancedPartition():
 		ref = config.parameter["convergence_reference"]
 		threshold = config.parameter["convergence_threshold"]
 		for i in range(1, max_iter+1):
-			#if len(cuts_lst) >= ref and zscore(cuts_lst[-ref:]) < threshold:
-			#	break
+			if len(cuts_lst) >= ref and zscore(cuts_lst[-ref:]) < threshold:
+				break
 			print("Shuffling...")
 			self.label_shuffle()
 			print("Round %d: label propagation..." % i)
@@ -159,11 +160,3 @@ class BalancedPartition():
 			return iter(self.labels)
 		else:
 			return iter(self.clusters)
-
-	def test(self):
-		N = self.G.number_of_nodes()
-		labels = self.labels
-		connections = self.connections
-		x = sum(sum(connections[i].values()) for i in range(N))
-		y = sum(connections[i][labels[i]] for i in range(N))
-		print(x, y)

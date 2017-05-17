@@ -26,7 +26,7 @@ if __name__ == "__main__":
 	parser.add_argument('-m', '--model', metavar='estimation model', dest="model", default="linear1")
 	parser.add_argument('-g', '--graph', metavar='name', dest="name", default="wiki-Vote")
 	parser.add_argument('-o', '--output', metavar='result file', dest="outputfile")
-	parser.add_argument('-M', '--method', metavar='method', dest="method", default="b2")
+	parser.add_argument('-M', '--method', metavar='method', dest="method", default="b1")
 	parser.add_argument('-l1', '--lambda1', metavar='lambda1', dest="lambda1", required=True)
 	parser.add_argument('-l2', '--lambda2', metavar='lambda2', dest="lambda2", required=True)
 	parser.add_argument('-b', '--binary', dest="binary", action='store_true')

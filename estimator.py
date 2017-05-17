@@ -29,7 +29,7 @@ def _get_true_ate(G, adjmat):
 
 def _sampling(G, model, method):
 	N = G.number_of_nodes()
-	if model == "uniform":
+	if method == "uniform":
 		return np.random.binomial(1, 0.5, N)
 	mapping = {"b1": 1, "b2": 2, "LRC": 3}
 	cluster_type = mapping[method]
@@ -40,12 +40,11 @@ def _sampling(G, model, method):
 		print("Loading clusters from cache...")
 		clusters = pickle.load(open(cluster_cache_path, "rb"))
 	else:
-		M = config.graph['partition_size']
 		if cluster_type == mapping["b2"]:
-			BP = BalancedPartition(G, M)
+			BP = BalancedPartition(G)
 			clusters = BP.clustering()
 		elif cluster_type == mapping["LRC"]:
-			clusters = lrc.clustering(G, M)
+			clusters = lrc.clustering(G)
 		util.save_cluster(clusters, name, cluster_type)
 	cnt = 0
 	for cluster in clusters:
@@ -93,14 +92,14 @@ def _estimate_lm2(Z, sigma, outcome):
 
 def estimate(G, model, method):
 	assert G.__class__.__name__ == "DiGraph", "Graph isn't digraph"
-	assert method in ["b1", "b2", "LRC"], "Method provided (%s) not exists" % method
+	assert method in ["uniform", "b1", "LRC"], "Method provided (%s) not exists" % method
 
 	#G, adjmat = _convert(G, method)
 	adjmat = nx.adjacency_matrix(G)
 	Z = _sampling(G, model, method)
 	outcome = util.outcome_generator(G, adjmat, Z)
 	true_ate = _get_true_ate(G, adjmat)
-	if model == "uniform":
+	if method == "uniform":
 		estimated_ate = np.mean(outcome[Z==1]) - np.mean(outcome[Z==0])
 	elif model == "linear1":
 		sigma = util.treated_proportion(adjmat, Z)

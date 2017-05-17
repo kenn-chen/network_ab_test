@@ -13,6 +13,6 @@ parameter = dict(
 	lambda2 = None,
 	shuffle = 0.01,
 	convergence_reference = 3,
-	convergence_threshold = 0.015,
+	convergence_threshold = 0.01,
 	iter_round = 5,
 )

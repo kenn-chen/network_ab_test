@@ -141,9 +141,9 @@ def google_matrix(G, alpha=0.85):
 	return M
 
 
-def clustering(G, M):
+def clustering(G):
 	G = linkrank(G)
-	BP = BalancedPartition(G, M, weighted=True)
+	BP = BalancedPartition(G, weighted=True)
 	return BP.clustering()
 
 
@@ -151,6 +151,6 @@ if __name__ == "__main__":
 	graph_file = "data/wiki-Vote.txt"
 	G = nx.convert_node_labels_to_integers(nx.read_edgelist(graph_file, create_using=nx.DiGraph()))
 	G = linkrank(G)
-	BP = BalancedPartition(G, 50, weighted=True)
+	BP = BalancedPartition(G, weighted=True)
 	x = BP.clustering()
 	print(list(x))
