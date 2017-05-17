@@ -31,7 +31,7 @@ def _sampling(G, model, method):
 	N = G.number_of_nodes()
 	if method == "uniform":
 		return np.random.binomial(1, 0.5, N)
-	mapping = {"b1": 1, "LRC": 1}
+	mapping = {"b1": 1, "LRC": 2}
 	cluster_type = mapping[method]
 	Z = np.empty(N)
 	name = config.dynamic["graph_name"]
