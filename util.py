@@ -59,19 +59,19 @@ def treated_proportion(adjmat, Z):
 
 def outcome_generator(G, adjmat, Z):
 	assert type(Z) == np.ndarray and Z.ndim == 1, "Z is not 1d array"
-	degrees = [d for _,d in G.out_degree()]
 	N = adjmat.shape[0]
 	lambda0 = config.parameter['lambda0']
 	lambda1 = config.parameter['lambda1']
 	lambda2 = config.parameter['lambda2']
-	D = np.array(degrees)
+	D = np.asarray(adjmat.sum(axis=1)).reshape(-1)
 	D[D == 0] = 1
 	Y = np.zeros(N)
 	def outcome_model(adjmat, Z, Y):
 		tmp = Y * adjmat.T #1d array * sparse matrix produces dot product
 		Y = lambda0 + lambda1*Z + lambda2*tmp/D + np.random.normal(0, 1, N)
-		Y[Y >  0] = 1
-		Y[Y <= 0] = 0
+		if config.dynamic["binary"]:
+			Y[Y >  0] = 1
+			Y[Y <= 0] = 0
 		return Y
 	for _ in range(config.parameter["iter_round"]):
 		Y = outcome_model(adjmat, Z, Y)
