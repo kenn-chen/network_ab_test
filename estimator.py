@@ -22,9 +22,12 @@ def _get_true_ate(G, adjmat):
 	N = adjmat.shape[0]
 	Z0 = np.zeros(N)
 	Z1 = np.ones(N)
-	Y0 = util.outcome_generator(G, adjmat, Z0)
-	Y1 = util.outcome_generator(G, adjmat, Z1)
-	return np.mean(Y1 - Y0)
+	results = []
+	for _ in range(10):
+		Y0 = util.outcome_generator(G, adjmat, Z0)
+		Y1 = util.outcome_generator(G, adjmat, Z1)
+		results.append(np.mean(Y1 - Y0))
+	return np.mean(results)
 
 
 def _sampling(G, model, method):
