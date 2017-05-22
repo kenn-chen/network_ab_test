@@ -10,13 +10,6 @@ import util
 from balanced_partition import BalancedPartition
 import link_rank_clustering as lrc
 
-def _remove_unidirectional_edges(G):
-	adjmat = nx.adjacency_matrix(G)
-	adjmat = adjmat + adjmat.T
-	adjmat[adjmat == 1] = 0
-	adjmat[adjmat == 2] = 1
-	G = nx.from_scipy_sparse_matrix(adjmat, create_using=nx.Graph())
-	return G
 
 def _get_true_ate(G, adjmat):
 	N = adjmat.shape[0]
@@ -59,7 +52,19 @@ def _sampling(G, model, method):
 	return Z
 
 
-def _estimate_lm1(Z, sigma, outcome):
+def difference_in_mean_estimator(Z, sigma, outcome):
+	x1 = Z == 1
+	x0 = Z == 0
+	y1 = sigma >= 0.8
+	y0 = sigma <= 0.2
+	m0 = np.logical_and(x0, y0)
+	m1 = np.logical_and(x1, y1)
+	a = np.mean(outcome[m1])
+	b = np.mean(outcome[m0])
+	return a - b
+
+
+def linear_model_estimateor(Z, sigma, outcome):
 	assert type(Z) == np.ndarray and Z.ndim == 1
 	assert type(sigma) == np.ndarray and sigma.ndim == 1
 	assert type(outcome) == np.ndarray and outcome.ndim == 1
@@ -69,28 +74,6 @@ def _estimate_lm1(Z, sigma, outcome):
 	beta = reg.coef_[0]
 	gamma = reg.coef_[1]
 	return beta + gamma
-
-
-def _estimate_lm2(Z, sigma, outcome):
-	assert type(Z) == np.ndarray and Z.ndim == 1
-	assert type(sigma) == np.ndarray and sigma.ndim == 1
-	assert type(outcome) == np.ndarray and outcome.ndim == 1
-	lr = linear_model.LinearRegression()
-	sigma0, outcome0 = sigma[Z == 0].reshape(-1, 1), outcome[Z == 0].reshape(-1, 1)
-	sigma1, outcome1 = sigma[Z == 1].reshape(-1, 1), outcome[Z == 1].reshape(-1, 1)
-	reg0 = lr.fit(sigma0, outcome0)
-	reg1 = lr.fit(sigma1, outcome1)
-	alpha0 = reg0.intercept_
-	alpha1 = reg1.intercept_
-	gamma1 = reg1.coef_[0]
-	return alpha1 + gamma1 - alpha0
-
-
-# def _convert(G, method):
-# 	if method == "baseline1":
-# 		G = G.to_undirected()
-# 	adjmat = nx.adjacency_matrix(G)
-# 	return G, adjmat
 
 
 def estimate(G, model, method):
@@ -104,12 +87,12 @@ def estimate(G, model, method):
 	true_ate = _get_true_ate(G, adjmat)
 	if method == "uniform":
 		estimated_ate = np.mean(outcome[Z==1]) - np.mean(outcome[Z==0])
-	elif model == "linear1":
+	elif method == "b1":
 		sigma = util.treated_proportion(adjmat, Z)
-		estimated_ate = _estimate_lm1(Z, sigma, outcome)
-	elif model == "linear2":
+		estimated_ate = linear_model_estimateor(Z, sigma, outcome)
+	elif method == "LRC":
 		sigma = util.treated_proportion(adjmat, Z)
-		estimated_ate = _estimate_lm2(Z, sigma, outcome)
+		estimated_ate = difference_in_mean_estimator(Z, sigma, outcome)
 	else:
 		raise Exception("Model specified not exists")
 	return true_ate, estimated_ate
