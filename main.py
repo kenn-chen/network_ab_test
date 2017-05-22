@@ -41,7 +41,7 @@ if __name__ == "__main__":
 	if args.outputfile is not None:
 		config.dynamic["outputfile"] = args.outputfile
 	elif args.binary:
-		config.dynamic["outputfile"] = "results/b_ate-%s-%s.csv" % (args.lambda1, args.lambda2)
+		config.dynamic["outputfile"] = "binary_results/ate-%s-%s.csv" % (args.lambda1, args.lambda2)
 	else:
 		config.dynamic["outputfile"] = "results/ate-%s-%s.csv" % (args.lambda1, args.lambda2)
 
