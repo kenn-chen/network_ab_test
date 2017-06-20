@@ -63,7 +63,7 @@ class BalancedPartition():
 	def get_connections(self):
 		G, labels = self.G, self.labels
 		N = G.number_of_nodes()
-		connections = defaultdict(lambda: defaultdict(int))
+		connections = defaultdict(lambda: defaultdict(float))
 		for node in range(N):
 			for followee in G.successors(node):
 				connections[node][labels[followee]] += G[node][followee]['weight']

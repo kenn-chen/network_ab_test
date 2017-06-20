@@ -66,14 +66,12 @@ def outcome_generator(G, adjmat, Z):
 	D = np.asarray(adjmat.sum(axis=1)).reshape(-1)
 	D[D == 0] = 1
 	Y = np.zeros(N)
-	def outcome_model(adjmat, Z, Y):
-		tmp = Y * adjmat.T #1d array * sparse matrix produces dot product
-		Y = lambda0 + lambda1*Z + lambda2*tmp/D + np.random.normal(0, 1, N)
-		if config.dynamic["binary"]:
-			Y[Y >  0] = 1
-			Y[Y <= 0] = 0
+	def outcome_model(Y):
+		Y = lambda0 + lambda1*Z + lambda2*Y*adjmat.T/D + np.random.normal(0, 1, N)
+		Y[Y > 0] = 1
+		Y[Y <= 0] = 0
 		return Y
 	for _ in range(config.parameter["iter_round"]):
-		Y = outcome_model(adjmat, Z, Y)
+		Y = outcome_model(Y)
 	assert Y.ndim == 1, "outcome is not 1d array"
 	return Y

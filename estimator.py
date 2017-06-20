@@ -9,6 +9,7 @@ import config
 import util
 from balanced_partition import BalancedPartition
 import link_rank_clustering as lrc
+import two_stage_clustering as tsc
 
 
 def _get_true_ate(G, adjmat):
@@ -27,7 +28,7 @@ def _sampling(G, model, method):
 	N = G.number_of_nodes()
 	if method == "uniform":
 		return np.random.binomial(1, 0.5, N)
-	mapping = {"b1": 1, "LRC": 2}
+	mapping = {"b1": 1, "LRC": 2, "TSC": 3}
 	cluster_type = mapping[method]
 	Z = np.empty(N)
 	name = config.dynamic["graph_name"]
@@ -39,6 +40,8 @@ def _sampling(G, model, method):
 		if cluster_type == mapping["b1"]:
 			BP = BalancedPartition(G)
 			clusters = BP.clustering()
+		elif cluster_type == mapping["TSC"]:
+			clusters = tsc.clustering(G)
 		elif cluster_type == mapping["LRC"]:
 			clusters = lrc.clustering(G)
 		util.save_cluster(clusters, name, cluster_type)
@@ -78,7 +81,7 @@ def linear_model_estimateor(Z, sigma, outcome):
 
 def estimate(G, model, method):
 	assert G.__class__.__name__ == "DiGraph", "Graph isn't digraph"
-	assert method in ["uniform", "b1", "LRC"], "Method provided (%s) not exists" % method
+	assert method in ["uniform", "b1", "TSC", "LRC"], "Method provided (%s) not exists" % method
 
 	#G, adjmat = _convert(G, method)
 	adjmat = nx.adjacency_matrix(G)
@@ -88,6 +91,9 @@ def estimate(G, model, method):
 	if method == "uniform":
 		estimated_ate = np.mean(outcome[Z==1]) - np.mean(outcome[Z==0])
 	elif method == "b1":
+		sigma = util.treated_proportion(adjmat, Z)
+		estimated_ate = linear_model_estimateor(Z, sigma, outcome)
+	elif method == "TSC":
 		sigma = util.treated_proportion(adjmat, Z)
 		estimated_ate = linear_model_estimateor(Z, sigma, outcome)
 	elif method == "LRC":
