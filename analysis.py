@@ -13,20 +13,14 @@ def write_result(graph, model, method, lambda1, lambda2, RMSE, bias, variance):
 	if graph in fouts:
 		fout = fouts[graph]
 	else:
-		if binary:
-			outputfile = "binary_results/%s.csv" % graph
-		else:
-			outputfile = "results/%s.csv" % graph
+		outputfile = "results/%s.csv" % graph
 		fout = open(outputfile, 'w')
 		fout.write("model,method,lambda1,lambda2,RMSE,bias,variance\n")
 		fouts[graph] = fout
 	fout.write("%s,%s,%.2f,%.2f,%f,%f,%f\n" % (model, method, lambda1, lambda2, RMSE, bias, variance))
 
 def compute(lambda1, lambda2):
-	if binary:
-		filename = "binary_results/ate-%g-%g.csv" % (lambda1, lambda2)
-	else:
-		filename = "results/ate-%g-%g.csv" % (lambda1, lambda2)
+	filename = "results/ate-%g-%g.csv" % (lambda1, lambda2)
 	results = defaultdict(list)
 	with open(filename) as fin:
 		fin.readline()
@@ -42,11 +36,6 @@ def compute(lambda1, lambda2):
 		write_result(graph, model, method, lambda1, lambda2, RMSE, bias, variance)
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description='Analysis.')
-	parser.add_argument('-b', '--binary', dest="binary", action='store_true')
-	args = parser.parse_args()
-	binary = args.binary
-
 	lambda1 = [0, 0.25, 0.75, 1]
 	lambda2 = [0, 0.1, 0.5, 1]
 	for l1 in lambda1:

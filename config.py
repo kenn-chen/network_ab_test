@@ -1,3 +1,7 @@
+files = dict(
+	results = "results/ate.csv"
+)
+
 graph = dict(
 	node_size = 20000,
 	partition_size = 50,
