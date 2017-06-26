@@ -30,14 +30,13 @@ class BalancedPartition():
 		self.G = self.G.to_undirected().to_directed()
 
 	def to_weighted(self):
-		H = G.copy()
-		E = H.number_of_edges()
-		N = H.number_of_nodes()
+		G = self.G = self.G.copy()
+		E = G.number_of_edges()
+		N = G.number_of_nodes()
 		weight = 1 / E
 		for u in range(N):
-			for v in H[u]:
-				H[u][v]['weight'] = weight
-		self.G = H
+			for v in G[u]:
+				G[u][v]['weight'] = weight
 
 
 	def init_partition(self):
