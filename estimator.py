@@ -28,7 +28,7 @@ def _sampling(G, model, method):
 	N = G.number_of_nodes()
 	if method == "uniform":
 		return np.random.binomial(1, 0.5, N)
-	mapping = {"b1": 1, "LRC": 2, "TSC": 3}
+	mapping = {"b1": 1, "LRC": 2, "TSC": 3, "b2": 4, "LRC-l": 2}
 	cluster_type = mapping[method]
 	Z = np.empty(N)
 	name = config.dynamic["graph_name"]
@@ -37,14 +37,18 @@ def _sampling(G, model, method):
 		print("Loading clusters from cache...")
 		clusters = pickle.load(open(cluster_cache_path, "rb"))
 	else:
-		if cluster_type == mapping["b1"]:
+		if cluster_type == 1:
 			BP = BalancedPartition(G)
 			clusters = BP.clustering()
-		elif cluster_type == mapping["TSC"]:
+		elif cluster_type == 4:
+			BP = BalancedPartition(G, ignore_direction=True)
+			clusters = BP.clustering()
+		elif cluster_type == 2:
 			clusters = tsc.clustering(G)
-		elif cluster_type == mapping["LRC"]:
+		elif cluster_type == 3:
 			clusters = lrc.clustering(G)
 		util.save_cluster(clusters, name, cluster_type)
+
 	cnt = 0
 	for cluster in clusters:
 		assignment = np.random.binomial(1, 0.5)
@@ -67,7 +71,7 @@ def difference_in_mean_estimator(Z, sigma, outcome):
 	return a - b
 
 
-def linear_model_estimateor(Z, sigma, outcome):
+def linear_model_estimator(Z, sigma, outcome):
 	assert type(Z) == np.ndarray and Z.ndim == 1
 	assert type(sigma) == np.ndarray and sigma.ndim == 1
 	assert type(outcome) == np.ndarray and outcome.ndim == 1
@@ -81,9 +85,8 @@ def linear_model_estimateor(Z, sigma, outcome):
 
 def estimate(G, model, method):
 	assert G.__class__.__name__ == "DiGraph", "Graph isn't digraph"
-	assert method in ["uniform", "b1", "TSC", "LRC"], "Method provided (%s) not exists" % method
+	assert method in ["uniform", "b1", "b2", "TSC", "LRC", "LRC-l"], "Method provided (%s) not exists" % method
 
-	#G, adjmat = _convert(G, method)
 	adjmat = nx.adjacency_matrix(G)
 	Z = _sampling(G, model, method)
 	outcome = util.outcome_generator(G, adjmat, Z)
@@ -92,13 +95,19 @@ def estimate(G, model, method):
 		estimated_ate = np.mean(outcome[Z==1]) - np.mean(outcome[Z==0])
 	elif method == "b1":
 		sigma = util.treated_proportion(adjmat, Z)
-		estimated_ate = linear_model_estimateor(Z, sigma, outcome)
+		estimated_ate = linear_model_estimator(Z, sigma, outcome)
+	elif method == "b2":
+		sigma = util.treated_proportion(adjmat, Z)
+		estimated_ate = linear_model_estimator(Z, sigma, outcome)
 	elif method == "TSC":
 		sigma = util.treated_proportion(adjmat, Z)
-		estimated_ate = linear_model_estimateor(Z, sigma, outcome)
+		estimated_ate = linear_model_estimator(Z, sigma, outcome)
 	elif method == "LRC":
 		sigma = util.treated_proportion(adjmat, Z)
 		estimated_ate = difference_in_mean_estimator(Z, sigma, outcome)
+	elif method == "LRC-l":
+		sigma = util.treated_proportion(adjmat, Z)
+		estimated_ate = linear_model_estimator(Z, sigma, outcome)
 	else:
 		raise Exception("Model specified not exists")
 	return true_ate, estimated_ate

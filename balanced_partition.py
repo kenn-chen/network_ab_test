@@ -13,17 +13,23 @@ import config
 import util
 
 class BalancedPartition():
-	def __init__(self, G, weighted=False):
+	def __init__(self, G, weighted=False, ignore_direction=False):
 		N = G.number_of_nodes()
+		self.G = G
+
+		if ignore_direction:
+			self.to_undirected()
 		if not weighted:
-			self.G = self.to_weighted(G)
-		else:
-			self.G = G
+			self.to_weighted()
+
 		self.labels, self.clusters = self.init_partition()
 		self.connections = self.get_connections()
 
 
-	def to_weighted(self, G):
+	def to_undirected(self):
+		self.G = self.G.to_undirected().to_directed()
+
+	def to_weighted(self):
 		H = G.copy()
 		E = H.number_of_edges()
 		N = H.number_of_nodes()
@@ -31,7 +37,7 @@ class BalancedPartition():
 		for u in range(N):
 			for v in H[u]:
 				H[u][v]['weight'] = weight
-		return H
+		self.G = H
 
 
 	def init_partition(self):
