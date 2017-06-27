@@ -116,7 +116,7 @@ class BalancedPartition():
 					if gain > max_gain:
 						max_gain, swap_node = gain, v
 			if swap_node:
-				self.swap_label(u, v)
+				self.swap_label(u, swap_node)
 		tension = sum(connections[i][labels[i]] for i in range(N)) / 2
 		cuts = 1 - tension
 		return cuts
@@ -165,3 +165,9 @@ class BalancedPartition():
 			return iter(self.labels)
 		else:
 			return iter(self.clusters)
+
+if __name__ == "__main__":
+	f = "data/soc-Slashdot0811.txt"
+	G = nx.convert_node_labels_to_integers(nx.read_edgelist(f, create_using=nx.DiGraph()))
+	BP = BalancedPartition(G)
+	BP.clustering()
