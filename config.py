@@ -18,5 +18,5 @@ parameter = dict(
 	shuffle = 0.01,
 	convergence_reference = 3,
 	convergence_threshold = 0.01,
-	iter_round = 5,
+	iter_round = 3,
 )

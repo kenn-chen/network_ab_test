@@ -13,15 +13,12 @@ import two_stage_clustering as tsc
 
 
 def _get_true_ate(G, adjmat):
-	N = adjmat.shape[0]
+	N = G.number_of_nodes()
 	Z0 = np.zeros(N)
 	Z1 = np.ones(N)
-	results = []
-	for _ in range(10):
-		Y0 = util.outcome_generator(G, adjmat, Z0)
-		Y1 = util.outcome_generator(G, adjmat, Z1)
-		results.append(np.mean(Y1 - Y0))
-	return np.mean(results)
+	Y0 = util.outcome_generator(G, adjmat, Z0)
+	Y1 = util.outcome_generator(G, adjmat, Z1)
+	return np.mean(Y1 - Y0)
 
 
 def _sampling(G, model, method):

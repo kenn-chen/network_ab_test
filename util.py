@@ -59,19 +59,26 @@ def treated_proportion(adjmat, Z):
 
 def outcome_generator(G, adjmat, Z):
 	assert type(Z) == np.ndarray and Z.ndim == 1, "Z is not 1d array"
-	N = adjmat.shape[0]
+	N = G.number_of_nodes()
+	if not config.dynamic["U"]:
+		config.dynamic["U"] = [np.random.normal(0, 1, N) for _ in range(config.parameter["iter_round"])]
+	U = config.dynamic[U]
+
 	lambda0 = config.parameter['lambda0']
 	lambda1 = config.parameter['lambda1']
 	lambda2 = config.parameter['lambda2']
 	D = np.asarray(adjmat.sum(axis=1)).reshape(-1)
 	D[D == 0] = 1
 	Y = np.zeros(N)
-	def outcome_model(Y):
-		Y = lambda0 + lambda1*Z + lambda2*Y*adjmat.T/D + np.random.normal(0, 1, N)
+
+	def outcome_model(Y, t):
+		Y = lambda0 + lambda1*Z + lambda2*Y*adjmat.T/D + U[t]
 		Y[Y > 0] = 1
 		Y[Y <= 0] = 0
 		return Y
-	for _ in range(config.parameter["iter_round"]):
-		Y = outcome_model(Y)
+
+	for t in range(config.parameter["iter_round"]):
+		Y = outcome_model(Y, t)
+
 	assert Y.ndim == 1, "outcome is not 1d array"
 	return Y
