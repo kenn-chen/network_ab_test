@@ -60,7 +60,7 @@ def treated_proportion(adjmat, Z):
 def outcome_generator(G, adjmat, Z):
 	assert type(Z) == np.ndarray and Z.ndim == 1, "Z is not 1d array"
 	N = G.number_of_nodes()
-	if not config.dynamic["U"]:
+	if "U" not in config.dynamic:
 		config.dynamic["U"] = [np.random.normal(0, 1, N) for _ in range(config.parameter["iter_round"])]
 	U = config.dynamic[U]
 
