@@ -62,7 +62,7 @@ def outcome_generator(G, adjmat, Z):
 	N = G.number_of_nodes()
 	if "U" not in config.dynamic:
 		config.dynamic["U"] = [np.random.normal(0, 1, N) for _ in range(config.parameter["iter_round"])]
-	U = config.dynamic[U]
+	U = config.dynamic["U"]
 
 	lambda0 = config.parameter['lambda0']
 	lambda1 = config.parameter['lambda1']
