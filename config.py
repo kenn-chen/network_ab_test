@@ -12,11 +12,11 @@ dynamic = dict(
 )
 
 parameter = dict(
-	lambda0 = -1.5,
+	lambda0 = 3,
 	lambda1 = None,
 	lambda2 = None,
 	shuffle = 0.01,
 	convergence_reference = 3,
 	convergence_threshold = 0.01,
-	iter_round = 3,
+	iter_round = 50,
 )

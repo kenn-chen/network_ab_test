@@ -21,6 +21,17 @@ from balanced_partition import BalancedPartition
 
 __all__ = ['pagerank', 'pagerank_numpy', 'pagerank_scipy', 'google_matrix']
 
+#def linkrank(G):
+#    adjmat = nx.adjacency_matrix(G)
+#    outdegrees = np.asarray(adjmat.sum(axis=1)).reshape(-1)
+#    indegrees = np.asarray(adjmat.sum(axis=0)).reshape(-1)
+#    with np.errstate(divide='ignore'):
+#        weight = indegrees / outdegrees
+#        weight[~np.isfinite(weight)] = 0
+#        total = np.sum(weight * outdegrees)
+#        rank = scipy.sparse.diags(weight) * adjmat
+#        rank /= total
+#    return nx.from_scipy_sparse_matrix(rank, create_using=nx.DiGraph())
 
 def linkrank(G):
 	GM, PR = google_matrix(G), pagerank(G)

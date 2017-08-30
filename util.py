@@ -73,8 +73,8 @@ def outcome_generator(G, adjmat, Z):
 
 	def outcome_model(Y, t):
 		Y = lambda0 + lambda1*Z + lambda2*Y*adjmat.T/D + U[t]
-		Y[Y > 0] = 1
-		Y[Y <= 0] = 0
+		#Y[Y > 0] = 1
+		#Y[Y <= 0] = 0
 		return Y
 
 	for t in range(config.parameter["iter_round"]):

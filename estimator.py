@@ -41,9 +41,9 @@ def _sampling(G, model, method):
 			BP = BalancedPartition(G, ignore_direction=True)
 			clusters = BP.clustering()
 		elif cluster_type == 2:
-			clusters = tsc.clustering(G)
-		elif cluster_type == 3:
 			clusters = lrc.clustering(G)
+		elif cluster_type == 3:
+			clusters = tsc.clustering(G)
 		util.save_cluster(clusters, name, cluster_type)
 
 	cnt = 0

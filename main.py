@@ -10,7 +10,7 @@ from estimator import estimate
 
 
 def write_result(model, method, graph, labmda1, lambda2, true_ate, estimated_ate):
-	outputfile = config.files['output']
+	outputfile = config.files['results']
 	if not os.path.exists(outputfile):
 		with open(outputfile, 'w') as fout:
 			fout.write("model,method,graph,lambda1,lambda2,true_ate,estimated_ate\n")
