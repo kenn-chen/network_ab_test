@@ -57,15 +57,24 @@ def _sampling(G, model, method):
 
 
 def difference_in_mean_estimator(Z, sigma, outcome):
-	x1 = Z == 1
-	x0 = Z == 0
-	y1 = sigma >= 0.8
-	y0 = sigma <= 0.2
-	m0 = np.logical_and(x0, y0)
-	m1 = np.logical_and(x1, y1)
-	a = np.mean(outcome[m1])
-	b = np.mean(outcome[m0])
-	return a - b
+	filter0 = np.logical_and(Z == 0, sigma <= 0.2)
+	filter1 = np.logical_and(Z == 1, sigma >= 0.8)
+	y0 = outcome[filter0]
+	y1 = outcome[filter1]
+	sigma0 = outcome[filter0]
+	sigma1 = outcome[filter1]
+
+	sy0 = ' '.join(map(str, y0))
+	sy1 = ' '.join(map(str, y1))
+	ssigma0 = ' '.join(map(str, sigma0))
+	ssigma1 = ' '.join(map(str, sigma1))
+
+	with open("results/outcome0.txt", "a") as fin0,
+		 open("results/outcome1.txt", "a") as fin1:
+		fin0.write('|'.join(sy0, ssigma0) + '\n')
+		fin1.write('|'.join(sy1, ssigma1) + '\n')
+
+	return np.mean(y1) - np.mean(y0)
 
 
 def linear_model_estimator(Z, sigma, outcome):
